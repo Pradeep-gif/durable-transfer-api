@@ -8,9 +8,9 @@
         <relativePath/>
     </parent>
     <groupId>com.portfolio</groupId>
-    <artifactId>transfer-orchestrator</artifactId>
+    <artifactId>transaction-api-demo</artifactId>
     <version>0.1.0</version>
-    <name>transfer-orchestrator</name>
+    <name>transaction-api-demo</name>
     <description>Small idempotent transfer API with durable workflow orchestration</description>
     <properties>
         <java.version>21</java.version>
