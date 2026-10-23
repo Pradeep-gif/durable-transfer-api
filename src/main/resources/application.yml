@@ -1,6 +1,6 @@
 spring:
   application:
-    name: transfer-orchestrator
+    name: transaction-api-demo
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/transfers}
     username: ${DATABASE_USER:transfer}
