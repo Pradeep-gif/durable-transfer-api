@@ -1,37 +1,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: transfer-orchestrator
+  name: transaction-api-demo
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: transfer-orchestrator
+      app: transaction-api-demo
   template:
     metadata:
       labels:
-        app: transfer-orchestrator
+        app: transaction-api-demo
     spec:
       containers:
         - name: app
-          image: transfer-orchestrator:local
+          image: transaction-api-demo:local
           ports:
             - containerPort: 8080
           env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: transfer-orchestrator
+                  name: transaction-api-demo
                   key: database-url
             - name: DATABASE_USER
               valueFrom:
                 secretKeyRef:
-                  name: transfer-orchestrator
+                  name: transaction-api-demo
                   key: database-user
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: transfer-orchestrator
+                  name: transaction-api-demo
                   key: database-password
             - name: TEMPORAL_TARGET
               value: temporal-frontend:7233
