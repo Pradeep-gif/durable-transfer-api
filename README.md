@@ -1,12 +1,15 @@
-# Transfer Orchestrator
+# Transaction API and Workflow Demo
 
-A compact Java backend project for a ten-minute technical walkthrough. It accepts transfer requests, stores them in PostgreSQL, prevents duplicate submissions with an idempotency key, and starts a Temporal workflow for asynchronous processing.
-
-This is a portfolio demonstration inspired by common financial-service backend problems. It is not affiliated with SoFi and does not move real money or connect to a payment provider.
+A compact Java backend project that demonstrates an idempotent transaction API backed by PostgreSQL and Temporal. It is a portfolio prototype for discussing transaction correctness, durable orchestration, API contracts, automated testing, and service operations. It does not move real money or connect to a payment provider.
 
 ## Stack
 
-Java 21, Spring Boot, REST, Bean Validation, PostgreSQL, Spring Data JPA, Temporal, Mockito, JUnit 5, Docker Compose, Kubernetes, GitHub Actions, and Spring Boot Actuator.
+- Java 21 and Spring Boot REST APIs with request validation
+- PostgreSQL and Spring Data JPA
+- Temporal workflow orchestration
+- JUnit 5 and Mockito
+- Docker Compose, Kubernetes manifests, GitHub Actions CI
+- Spring Boot Actuator health and metrics endpoints
 
 ## Run locally
 
@@ -17,7 +20,7 @@ mvn test
 docker compose up --build
 ```
 
-API: http://localhost:8080. Temporal UI: http://localhost:8233. Health: http://localhost:8080/actuator/health.
+The API listens on `http://localhost:8080`, Temporal UI on `http://localhost:8233`, and health checks on `http://localhost:8080/actuator/health`.
 
 ## Try it
 
@@ -28,16 +31,16 @@ curl -i -X POST http://localhost:8080/api/transfers \
   -d '{"sourceAccountId":"acct-100","destinationAccountId":"acct-200","amount":25.00,"currency":"USD"}'
 ```
 
-The API returns `202 Accepted` with a transfer ID and `PENDING` status. Query it with `GET /api/transfers/{id}`. Repeating the idempotency key returns the existing transfer instead of starting another workflow.
+The API returns `202 Accepted` with a transfer ID and `PENDING` status. Query it with `GET /api/transfers/{id}`. Repeating the same key and same request returns the existing transfer. Reusing that key with a different request returns `409 Conflict`.
 
 ## Ten-minute walkthrough
 
-1. **API contract (2 min):** `TransferController` validates requests and returns a stable response.
-2. **Correctness (2 min):** `TransferService` rejects same-account transfers; a PostgreSQL unique constraint protects idempotency keys.
-3. **Async work (2 min):** a Temporal workflow runs an activity that advances the transfer lifecycle. Workflow IDs derive from transfer IDs.
-4. **Testing (2 min):** Mockito tests cover creation, repeat requests, and invalid account pairs.
-5. **Operations (2 min):** Compose runs PostgreSQL and Temporal; Actuator exposes health and metrics; CI runs Maven verification; Kubernetes manifests include probes, resource limits, and secret references.
+1. **API and data model (2 min):** inspect the validated request/response records and the PostgreSQL entity.
+2. **Correctness (2 min):** trace the idempotency-key uniqueness constraint and the `409` behavior for key reuse with changed request data.
+3. **Durable work (2 min):** follow the Temporal workflow and activity; workflow IDs derive from the persisted transfer ID.
+4. **Tests (2 min):** run `mvn test`; tests cover creation, safe retries, changed-payload conflicts, and invalid same-account transfers.
+5. **Operations (2 min):** review health/metrics endpoints, CI, container setup, Kubernetes probes, and the production considerations below.
 
-## Production design discussion
+## Production considerations
 
-The activity currently marks a transfer complete as a demo. Production work would call a provider and post balanced ledger entries. It would also use a transactional outbox so database commit and workflow scheduling cannot diverge, check that a repeated idempotency key has the same request payload, add authorization and account ownership checks, and use managed secrets, migrations, structured logs, and provider-specific retry policies. The local defaults and `ddl-auto: update` are for demonstration only.
+This demo marks a transfer complete through a local activity. A real money movement system would need a transactional outbox so database writes and workflow scheduling cannot diverge, provider integration with carefully scoped retries, ledger posting and reconciliation, authorization, schema migrations, managed secrets, structured logs, SLOs, and load/chaos testing. Local configuration uses Hibernate schema updates and development credentials; do not deploy it as-is.
