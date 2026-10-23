@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: transfer-orchestrator
+  name: transaction-api-demo
 spec:
   selector:
-    app: transfer-orchestrator
+    app: transaction-api-demo
   ports:
     - name: http
       port: 80
